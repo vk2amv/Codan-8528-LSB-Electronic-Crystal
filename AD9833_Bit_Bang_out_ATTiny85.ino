@@ -33,8 +33,11 @@ This has a result of reducing the DDS module output, Square wave does around 4.5
 This level still seems to be plenty to drive the crystal buffer in the radio however, and in my radio it killed off the whine completely.
 Many thanks for Dave VK2JDS for noting this problem and his assitance in fixing it.
 
+23/02/2020  V1.3
+Minor code corrections and a few spelling and grammer errors corrected in the comments.
 
-Still to do: Change the frequency calculation so a decimal value can be used instead of having to pre calculate the HEX value.
+
+Still to do: Add the frequency calculation math so a decimal value can be set in this code instead of having to pre calculate the HEX value for setting the frequency.
 */
 
 
@@ -67,8 +70,8 @@ void setup() {
 
 
 // This is the waveform to set the AD9833 to, can be SINE, SQUARE, or TRIANGLE
-// The AD9833 is limited to 0.6Volts when in SINE wave mode so we are using SQUARE wave mode because the output is about 4.5Volts in that mode
-// which suits the logic level inputs on the Codan Z3 crystal input nicely
+// The AD9833 is limited to 0.6 Volts peak to peak when in SINE wave mode and 4.5 Volts peak to peak in SQUARE wave mode, testing has shown that either mode produces
+// enough signal to drive the Codan Z3 crystal input, however SQUARE wave output creates an audio whine on receive so SINE wave is used here.
 waveform = SINE;
 
 
@@ -78,15 +81,15 @@ waveform = SINE;
 // I calculated the settings here using this site http://stompville.co.uk/AD9833.php
 // For reference whan calculating frequency values the AD9833 has a 25Mhz clock crystal
 // The values here produce 1.647Mhz when outputting a SINE wave
-//freqlow = 0x5830;
-//freqhigh = 0x4437;
+freqlow = 0x5830;
+freqhigh = 0x4437;
 
-// Temp change to 1,000 Hz for 2 meter Fox audio
-freqlow = 0x69f1;
-freqhigh = 0x4000;
+// Temp change to 1,000 Hz for 2 meter Fox audio experiment with the module
+//freqlow = 0x69f1;
+//freqhigh = 0x4000;
 
 // This is for 3.294Mhz, seems square wave output needs to be set to double the required frequency
-// still investigating why exactly but I think I am just missing something completly obvious
+// still investigating why exactly but I think I am just missing something completly obvious in the datasheet
 // not too worried though as it works fine so think I will just leave it be
 //freqlow = 0x7060;
 //freqhigh = 0x486e;
@@ -100,13 +103,13 @@ freqhigh = 0x4000;
  digitalWrite(ss, HIGH);  // Sets the AD9833 FSYNC pin initial state to HIGH for inactive
  digitalWrite(sclk, HIGH); // Sets clock pin initial state to HIGH for clock idle
  
- delay(500);  // Wait 500 milliseconds to let everything settle
+ delay(250);  // Wait 250 milliseconds to let everything settle
  send_word(reset);  //Power on reset of AD9833 as recommended in Datasheet
- delay(500);   // Wait 500 milliseconds to let the reset complete and let everything settle again before sending frequency setting
+ delay(100);   // Wait 100 milliseconds to let the reset complete and let everything settle again before sending frequency setting
 
 
  
- // Ok time to send the required data to get the required waveform out of the AD9833 module
+ // Ok time to send the required data to set the required waveform out of the AD9833 module
  // The lines below send the required data in words of 16 bits at a time using the send_word function to clock it out to the AD9833
 
  send_word(0x2100);  // These two bytes puts the AD9833 in reset mode and also ready to receive frequency settings
